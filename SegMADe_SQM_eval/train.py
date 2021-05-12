@@ -7,21 +7,23 @@ import tensorflow as tf
 tf.get_logger().setLevel("ERROR")
 from keras.callbacks import ModelCheckpoint, EarlyStopping, LearningRateScheduler
 from keras.optimizers import Adam
+from keras.losses import binary_crossentropy
 from keras.utils import plot_model
 import time
 from utils import *
 import pickle as pkl
 from model import *
+from augmentation import *
 from keras import backend as K
 from pathlib import Path
-import random
+
 
 random.seed(1)
 np.random.seed(1)
 tf.random.set_seed(1)
 
 
-def AC(y_true, y_pred):
+def AC_highL(y_true, y_pred):
     """
     Active Contour loss, keras custom loss function
     :param y_true: tensor, y_true
@@ -38,7 +40,23 @@ def AC(y_true, y_pred):
     region_in = K.abs(K.mean(y_pred * ((y_true - c1) ** 2), axis=1))
     region_out = K.abs(K.mean((1 - y_pred) * ((y_true - c2) ** 2), axis=1))
 
-    return 4 * length + (region_in + region_out)
+
+    return 6 * length + (region_in + region_out)
+
+
+def DICE(y_true, y_pred, smooth=0.0000001):
+    intersection = K.sum(K.abs(y_true * y_pred), axis=1)
+    union = K.sum(K.square(y_true), axis=1) + K.sum(K.square(y_pred), axis=1)
+    dice_loss = 1 - (2. * intersection + smooth) / (union + smooth)
+    print(dice_loss.shape)
+    return dice_loss
+
+
+def JAC(y_true, y_pred, smooth=0.0000001):
+    intersection = K.sum(K.abs(y_true * y_pred), axis=1)
+    sum_ = K.sum(K.abs(y_true) + K.abs(y_pred), axis=1)
+    jac = (intersection + smooth) / (sum_ - intersection + smooth)
+    return (1 - jac) * smooth
 
 
 def generate_sample_weight(y):
@@ -65,7 +83,7 @@ def model_train(
     plot_model_to_img=False,
     learning_rate=0.005,
     n_epochs=200,
-    batch_size=64,
+    batch_size=128,
     es_patience=15,
     shuffle=False,
     use_aug=False,
@@ -116,7 +134,7 @@ def model_train(
     y_seg_train = y_seg_train.reshape((y_seg_train.shape[0], y_seg_train.shape[1], 1))
     y_seg_val = y_seg_val.reshape((y_seg_val.shape[0], y_seg_val.shape[1], 1))
 
-    model_dir = 'model/{}/'.format(fidx)
+    model_dir = 'model_DICE1L/{}/'.format(fidx)
 
     if not os.path.isdir(model_dir) and use_aug:
         os.mkdir(model_dir)
@@ -146,7 +164,6 @@ def model_train(
     sample_weight_train = generate_sample_weight(y_seg_train.squeeze())
     sample_weight_val = generate_sample_weight(y_seg_val.squeeze())
 
-
     unet = construct_unet(filter_size=16)
 
     def dice_metric(y_true, y_pred):
@@ -158,7 +175,9 @@ def model_train(
     unet.compile(
         optimizer=Adam(learning_rate=0.0005),
         metrics=[dice_metric],
-        loss=AC
+        # loss="binary_crossentropy"
+        # loss=DICE
+        loss=AC_highL
     )
 
     history = unet.fit(
