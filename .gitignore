@@ -130,3 +130,11 @@ dmypy.json
 
 # .npy files
 *.npy
+
+# images
+*.png
+*.jpg
+*.jpeg
+
+# mdoel files
+*.h5
