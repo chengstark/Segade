@@ -128,9 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# .npy files
-*.npy
-
 # images
 *.png
 *.jpg
@@ -138,3 +135,6 @@ dmypy.json
 
 # mdoel files
 *.h5
+
+#DS_Store
+*.DS_Store
