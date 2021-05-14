@@ -21,7 +21,9 @@ def get_dice(TESTSET_NAME, real_dataset_name, ax):
                             for i, line in enumerate(fp):
                                 line = line.strip()
                                 if i == 3:
+                                    # line = float(line.split(' ')[0])
                                     DICE_dict[model+exp].append(line)
+                            # line = float(line.split(' ')[0])
                             nt_dict[model+exp].append(line)
                         fp.close()
             else:
@@ -31,7 +33,7 @@ def get_dice(TESTSET_NAME, real_dataset_name, ax):
                 nt_dict[model] = []
                 for f in os.listdir(seg_report_folder):
                     if len(f) == 17 and '10' not in f: continue
-                    print(f)
+                    # print(f)
 
                     target_line = 3
 
@@ -43,7 +45,9 @@ def get_dice(TESTSET_NAME, real_dataset_name, ax):
                                 if ']' in line:
                                     target_line = 4
                                     continue
+                                # line = float(line.split(' ')[0])
                                 DICE_dict[model].append(line)
+                        # line = float(line.split(' ')[0])
                         nt_dict[model].append(line)
                     fp.close()
         else:
@@ -55,7 +59,9 @@ def get_dice(TESTSET_NAME, real_dataset_name, ax):
                 for i, line in enumerate(fp):
                     line = line.strip()
                     if i == 3:
+                        # line = float(line.split(' ')[0])
                         DICE_dict[model].append(line)
+                # line = float(line.split(' ')[0])
                 nt_dict[model].append(line)
             fp.close()
 
@@ -73,12 +79,16 @@ def get_dice(TESTSET_NAME, real_dataset_name, ax):
             x_loc += 0.3
             ax.errorbar(x_loc, float(dice.split(' +- ')[0]), yerr=float(dice.split(' +- ')[1]), capsize=3, color=colors[idx])
         tick_pos.append(((x_loc - s) // 2) + s)
-        print(model, len(dices))
+        # print(model, len(dices))
         x_loc += 2
 
-    ax.errorbar(x_loc//2, y=float(DICE_dict['unet'][0].split(' +- ')[0]), yerr=float(DICE_dict['unet'][0].split(' +- ')[1]), color='purple', linewidth=4)
+    # rgb_colors = []
+    # for c in colors:
+    #     rgb_colors.append(matplotlib.colors.to_rgba_array(c))
+
+    ax.errorbar(x_loc//2, y=float(DICE_dict['unet'][0].split(' +- ')[0]), yerr=float(DICE_dict['unet'][0].split(' +- ')[1]), color='purple', linewidth=4, label='Proposed\nModel')
     ax.axhline(y=float(DICE_dict['unet'][0].split(' +- ')[0]), color='purple', linewidth=1)
-    ax.text(3, float(DICE_dict['unet'][0].split(' +- ')[0]), 'Proposed Model', color='purple')
+    # ax.text(1.8, float(DICE_dict['unet'][0].split(' +- ')[0]), 'Proposed Model', color='purple')
 
     ax.set_xticks(tick_pos)
     ax.set_xticklabels(['Baseline 1', 'Baseline 2', 'Baseline 3', 'Baseline 4'], rotation=45)
@@ -87,21 +97,30 @@ def get_dice(TESTSET_NAME, real_dataset_name, ax):
     for ticklabel, tickcolor in zip(ax.get_xticklabels(), colors):
         ticklabel.set_color(tickcolor)
     ax.set_title(real_dataset_name)
+
     # plt.show()
 
 
 if __name__ == '__main__':
-    fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, nrows=1, figsize=(9, 4))
-    axs = [ax1, ax2, ax3]
-    for idx, dataset_ in enumerate(['new_PPG_DaLiA_test', 'WESAD_all', 'TROIKA_channel_1']):
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(ncols=4, nrows=1, figsize=(10, 4))
+    axs = [ax1, ax2, ax3, ax4]
+    for idx, dataset_ in enumerate(['ucsf', 'new_PPG_DaLiA_test', 'WESAD_all', 'TROIKA_channel_1']):
+        print(dataset_)
+        dataset = ''
         if dataset_ == 'new_PPG_DaLiA_test': dataset = 'PPG DaLiA test set'
         if dataset_ == 'WESAD_all': dataset = 'WESAD'
         if dataset_ == 'TROIKA_channel_1': dataset = 'TROIKA'
-
+        if dataset_ == 'ucsf': dataset = 'UCSF'
         get_dice(dataset_, dataset, axs[idx])
         print('----------------')
-        plt.tight_layout()
-        plt.savefig('visualize_all/all_datasets_DICE-tv2.jpg')
+
+    handles, labels = axs[0].get_legend_handles_labels()
+    lgd = fig.legend(handles, labels, loc='upper left', facecolor='white', framealpha=1)
+
+    for text in lgd.get_texts():
+        text.set_color("purple")
+    plt.tight_layout()
+    plt.savefig('visualize_all/all_datasets_DICE-tv2.jpg')
 
 
 
