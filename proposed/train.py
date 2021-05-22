@@ -31,14 +31,14 @@ def AC(y_true, y_pred):
     x = y_pred[:, 1:, :] - y_pred[:, :-1, :]
     delta_x = x[:, :-2, :] ** 2
 
-    length = K.mean(K.sqrt(delta_x + 1e-6), axis=1)
+    transition = K.mean(K.sqrt(delta_x + 1e-6), axis=1)
 
     c1 = K.ones_like(y_true)
     c2 = K.zeros_like(y_true)
     region_in = K.abs(K.mean(y_pred * ((y_true - c1) ** 2), axis=1))
     region_out = K.abs(K.mean((1 - y_pred) * ((y_true - c2) ** 2), axis=1))
 
-    return 4 * length + (region_in + region_out)
+    return 4 * transition + (region_in + region_out)
 
 
 def generate_sample_weight(y):
@@ -67,11 +67,7 @@ def model_train(
     n_epochs=200,
     batch_size=64,
     es_patience=15,
-    shuffle=False,
-    use_aug=False,
-    aug_slices=0,
-    aug_stitch_impact_range=0,
-    aug_amount=0,
+    shuffle=False
 ):
     """
 
@@ -82,10 +78,6 @@ def model_train(
     :param batch_size: integer, batch size
     :param es_patience: integer, early stop patience
     :param shuffle: bool, shuffle or not for keras training
-    :param use_aug: bool, use augmentation or not
-    :param aug_slices: integer, number slices for each augmented signal
-    :param aug_stitch_impact_range: integer, effect range of the stitching of slices of segments in augmentation process
-    :param aug_amount: integer, number of augmentations
     :return: None
     """
     print('-------------------------------Training Fold {}-------------------------------'.format(fidx))
