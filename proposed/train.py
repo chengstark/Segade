@@ -78,7 +78,7 @@ def model_train(
     :param batch_size: integer, batch size
     :param es_patience: integer, early stop patience
     :param shuffle: bool, shuffle or not for keras training
-    :return: None
+    :return: None 
     """
     print('-------------------------------Training Fold {}-------------------------------'.format(fidx))
 
@@ -110,23 +110,8 @@ def model_train(
 
     model_dir = 'model/{}/'.format(fidx)
 
-    if not os.path.isdir(model_dir) and use_aug:
+    if not os.path.isdir(model_dir):
         os.mkdir(model_dir)
-
-    if not os.path.isdir(model_dir + '/augmentations/') and use_aug:
-        os.mkdir(model_dir + '/augmentations/')
-
-    if use_aug:
-        if not os.path.isdir(model_dir + '/aug_plots/'):
-            os.mkdir(model_dir + '/aug_plots/')
-        if not os.path.isdir(model_dir + '/aug_plots/'):
-            os.mkdir(model_dir + '/aug_plots/')
-
-        aug = Augmenter(X_train, y_seg_train, aug_slices)
-        X_train, y_seg_train = aug.augment(aug_amount, impact_range=aug_stitch_impact_range, plot_samples=True,
-                                           plot_folder=model_dir + '/aug_plots/', plot_amount=20)
-
-        np.savetxt(model_dir+'/augmentations/aug.txt', y_seg_train.squeeze())
 
     early_stopping = EarlyStopping(monitor='val_loss', patience=es_patience, verbose=1, mode='min')
     mcp_save = ModelCheckpoint(
