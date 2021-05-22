@@ -118,8 +118,6 @@ def model_train(
         model_dir + '/unet_best.h5', save_best_only=True,
         monitor='val_loss', mode='min')
 
-    print(y_seg_train.squeeze().shape)
-
     sample_weight_train = generate_sample_weight(y_seg_train.squeeze())
     sample_weight_val = generate_sample_weight(y_seg_val.squeeze())
 
