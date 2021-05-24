@@ -7,6 +7,19 @@ from train import *
 
 
 def post_process(TESTSET_NAME, seg_length, interval):
+    """
+    Post process the CNN sliding window results
+    Generate sliding windows from test sets
+    Make predictions on test set sliding windows
+    :param TESTSET_NAME: test set name
+    :type TESTSET_NAME: str
+    :param seg_length: sliding window length
+    :type seg_length: int
+    :param interval: sliding window interval
+    :type interval: int
+    :return: None
+    :rtype: None
+    """
     data_dir = str(Path(os.getcwd()).parent) + '/data/{}/'.format(TESTSET_NAME)
     X_test = np.load(data_dir + '/processed_dataset/scaled_ppgs.npy')
     y_seg_trues = np.load(data_dir + '/processed_dataset/seg_labels.npy')

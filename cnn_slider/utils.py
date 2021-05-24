@@ -13,9 +13,12 @@ random.seed(1)
 def perf_measure(y_true, y_pred):
     """
     Calculate TP, FP, TN, FN
-    :param y_true: numpy array or list, true labels
-    :param y_pred: numpy array or list, predicted labels
-    :return: integers, TP, FP, TN, FN
+    :param y_true: true labels
+    :type y_true: np.ndarray
+    :param y_pred: predicted labels
+    :type y_pred: np.ndarray
+    :return: TP, FP, TN, FN
+    :rtype: int, int, int, int
     """
     TP = 0
     FP = 0
@@ -36,6 +39,15 @@ def perf_measure(y_true, y_pred):
 
 
 def calc_TPR_FPR(y_trues_flat, y_preds_flat):
+    """
+    Calculate TPR and FPR
+    :param y_trues_flat: true labels
+    :type y_trues_flat: np.ndarray
+    :param y_preds_flat: predicted labels
+    :type y_preds_flat: np.ndarray
+    :return: TPR, FPR
+    :rtype: float
+    """
     TP, FP, TN, FN = perf_measure(y_trues_flat, y_preds_flat)
     if TP == 0:
         TPR = 0.0
@@ -51,14 +63,25 @@ def calc_TPR_FPR(y_trues_flat, y_preds_flat):
 def check_mkdir(dir_):
     """
     Check if the directory exists, if not create this directory
-    :param dir_: string, target directory
+    :param dir_: target directory
+    :type dir_: str
     :return: None
+    :rtype: None
     """
     if not os.path.exists(dir_):
         os.mkdir(dir_)
 
 
 def sort_TPRs_FPRs(TPR, FPR):
+    """
+    Sort TPR by FPR
+    :param TPR: TPRs
+    :type TPR: list(float)
+    :param FPR: FPRs
+    :type FPR: list(float)
+    :return: sorted_TPR, sorted_FPR
+    :rtype: list(float), list(float)
+    """
     sorted_TPR = [x for _, x in sorted(zip(FPR.tolist(), TPR.tolist()))]
     sorted_FPR = [x for x, _ in sorted(zip(FPR.tolist(), TPR.tolist()))]
     return sorted_TPR, sorted_FPR
@@ -67,10 +90,14 @@ def sort_TPRs_FPRs(TPR, FPR):
 def plot_confusion_matrix(cm, index=[0, 1, 2], columns=[0, 1, 2]):
     """
     Plot confusion matrix
-    :param cm: array, confusion matrix
-    :param index: list, index
-    :param columns: list, columns
+    :param cm: confusion matrix
+    :type cm: np.ndarray
+    :param index: index
+    :type index: list
+    :param columns: columns
+    :type columns: list
     :return: None
+    :rtype: None
     """
     df_cm = pd.DataFrame(cm, index=index,
                          columns=columns)
@@ -81,20 +108,26 @@ def plot_confusion_matrix(cm, index=[0, 1, 2], columns=[0, 1, 2]):
 def shrink_data(X, n_th=3):
     """
     Brute force shrink a signal, delete every n th element
-    :param X: array, signal
-    :param n_th: integer, n th element to remove
-    :return: array, processed signal
+    :param X: signal
+    :type X: np.ndarray
+    :param n_th: n th element to remove
+    :type n_th: int
+    :return: shrinked signal
+    :rtype: np.ndarray
     """
-    deleted = np.delete(X, np.arange(0, X.shape[1], n_th), axis=1)
-    return deleted
+    shrinked = np.delete(X, np.arange(0, X.shape[1], n_th), axis=1)
+    return shrinked
 
 
 def plot_history(history):
     """
     Plot keras training history
     :param history: keras history
+    :type history: tf.keras.callbacks.History
     :return: None
+    :rtype: None
     """
+
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 7))
 
     ax1.plot(history.history['accuracy'])
@@ -115,12 +148,18 @@ def plot_history(history):
 def blind_seg(X, y, amount, seg_length, threshold):
     """
     Blind segmentation, randomly generate segments/ windows from signal and signal segmentation label
-    :param X: array, signal
-    :param y: array, segmentation label
-    :param amount: integer, number of windows to generate
-    :param seg_length: seg_length: integer, seconds*64Hz sampling rate, segment length/ sliding window length
-    :param threshold: threshold: float, range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
-    :return: list of arrays, windows and their corresponding classification labels (clean/ artifacts)
+    :param X: signal
+    :type X: np.ndarray
+    :param y: segmentation label
+    :type y: np.ndarray
+    :param amount: number of windows to generate
+    :type amount: integer
+    :param seg_length: sliding window length
+    :type seg_length: int
+    :param threshold: range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
+    :type threshold: float
+    :return: windows and their corresponding classification labels (clean/ artifacts)
+    :rtype: list(np.ndarray), list(np.ndarray)
     """
 
     cleans = []
@@ -164,11 +203,16 @@ def blind_seg(X, y, amount, seg_length, threshold):
 def process_sliding_results(y_slide, y_seg, slices, prob_thresh):
     """
     Process sliding windows classification results, convert classification labels to segmentation label
-    :param y_slide: array, classification labels
-    :param y_seg: array, segmentation labels (ground truth) for shape reference, passing in the signal would still work
-    :param slices: array or list, slices of windows, [[start, end], [start, end], [start, end]...]
-    :param prob_thresh: float, probability threshold for calculate ROC
-    :return: array, processed segmentation prediction labels
+    :param y_slide: classification labels
+    :type y_slide: np.ndarray
+    :param y_seg: segmentation labels (ground truth) for shape reference, passing in the signal would still work
+    :type y_seg: np.ndarray
+    :param slices: slices of windows, [[start, end], [start, end], [start, end]...]
+    :type slices: np.ndarray or list
+    :param prob_thresh: probability threshold for calculate ROC
+    :type prob_thresh: float
+    :return: segmentation mask
+    :rtype: np.ndarray
     """
     y_base = np.zeros((y_seg.shape[0], ))
     for idx, y in enumerate(y_slide):
@@ -181,12 +225,18 @@ def process_sliding_results(y_slide, y_seg, slices, prob_thresh):
 def slide_window(X, y, seg_length, interval, threshold):
     """
     Create sliding windows based on segment/ window length and window interval
-    :param X: array, signal
-    :param y: array, segmentation label ground truth
-    :param seg_length: seg_length: integer, seconds*64Hz sampling rate, segment length/ sliding window length
-    :param interval: integer, seconds*64Hz sampling rate, interval between sliding windows
-    :param threshold: float, range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
+    :param X: signal
+    :type X: np.ndarray
+    :param y: segmentation label ground truth
+    :type y: np.ndarray
+    :param seg_length: seconds*64Hz sampling rate, segment length/ sliding window length
+    :type seg_length: int
+    :param interval: seconds*64Hz sampling rate, interval between sliding windows
+    :type interval: int
+    :param threshold: range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
+    :type threshold: float
     :return: signal windows outputs, window classification labels, slices of windows, [[start, end], [start, end], [start, end]...]
+    :rtype: np.ndarray, np.ndarray, list[int]
     """
     X_outs = []
     y_outs = []

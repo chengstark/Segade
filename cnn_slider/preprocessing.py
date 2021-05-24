@@ -6,6 +6,17 @@ from tqdm import tqdm
 
 
 def preprocess(train_amount, threshold, seg_length):
+    """
+    Preprocess the sliding windows
+    :param train_amount: number of training samples needed, validation amount will be 0.2 * train_amount
+    :type train_amount: int
+    :param threshold: threshold determining clean or artifact
+    :type threshold: float
+    :param seg_length: sliding window length
+    :type seg_length: int
+    :return: None
+    :rtype: None
+    """
     data_dir = str(Path(os.getcwd()).parent) + '/data_folds/new_PPG_DaLiA_train/'
     for fidx in range(10):
         X_train = np.load(data_dir + '/X_train_{}.npy'.format(fidx))

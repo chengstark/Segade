@@ -26,10 +26,10 @@ assert 1920 % seg_length == 0
 
 
 '''preprocessing training set'''
-# if TRAINING:
-#     for threshold in tqdm(range(0, 10)):
-#         threshold = threshold / 10
-#         preprocess(train_amount, threshold, seg_length)
+if TRAINING:
+    for threshold in tqdm(range(0, 10)):
+        threshold = threshold / 10
+        preprocess(train_amount, threshold, seg_length)
 
 
 '''Training'''
@@ -82,10 +82,8 @@ if EVALUATING:
                     model_eval(
                         fidx,
                         working_dir=working_dir,
-                        report_file=report_file,
                         threshold=threshold,
                         seg_length=seg_length,
-                        window_interval=interval,
                         prob_thresh=prob_thresh,
                         plot_limit=0,
                         TESTSET_NAME=TESTSET_NAME

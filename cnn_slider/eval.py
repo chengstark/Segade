@@ -23,31 +23,34 @@ def model_eval(
     working_dir,
     threshold,
     seg_length,
-    window_interval,
     prob_thresh,
     plot_limit,
     TESTSET_NAME,
 ):
     """
     Evaluation function for CNN sliding window method
-    :param fidx: integer, fold index range(0, 10)
-    :param working_dir: string, location/ directory to store fold evaluation results
-    :param report_file: I/O file object, file to write classification report and DICE sore to
-    :param threshold: float, range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
-    :param seg_length: integer, seconds*64Hz sampling rate, segment length/ sliding window length
-    :param window_interval: integer, seconds*64Hz sampling rate, interval between sliding windows
-    :param prob_thresh: float, range(0, 11, 1), probability threshold to calculate ROC
-    :param plot_limit: integer, number of plots to generate (set to 0 if no plots are needed or to reduce processing time)
-    :param TESTSET_NAME: string, test set name, make sure to have this named folder in parent 'data/' directory
+    :param fidx: fold index range(0, 10)
+    :type fidx: int
+    :param working_dir: location/ directory to store fold evaluation results
+    :type working_dir: str
+    :param threshold: range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
+    :type threshold: float
+    :param seg_length: sliding window length
+    :type seg_length: int
+    :param prob_thresh: range(0, 11, 1), probability threshold to calculate ROC
+    :type prob_thresh: float
+    :param plot_limit: number of plots to generate (set to 0 if no plots are needed or to reduce processing time)
+    :type plot_limit: int
+    :param TESTSET_NAME: test set name, make sure to have this named folder in parent 'data/' directory
+    :type TESTSET_NAME: str
     :return: TPR, FPR, DICE score
+    :rtype: float, float, float
     """
 
     plot_path = working_dir+'/plots/plot_{}_{}/'.format(threshold, prob_thresh)
     check_mkdir(plot_path)
 
-    # print('--------------------------Prob Thresh {}--------------------------'.format(prob_thresh), file=report_file)
-    # print('Threshold {} | Seg_length {} | window_interval {}'.format(threshold, seg_length, window_interval),
-    #       file=report_file)
+    # loading data
     data_dir = str(Path(os.getcwd()).parent) + '/data/{}/'.format(TESTSET_NAME)
     X_test = np.load(data_dir+'/processed_dataset/scaled_ppgs.npy')
     y_seg_trues = np.load(data_dir+'/processed_dataset/seg_labels.npy')
@@ -57,6 +60,7 @@ def model_eval(
     y_raw_slide_preds = np.load('results/{}/thresh_{}_seg_length_{}/{}/y_raw_slide_preds_{}.npy'
                                 .format(TESTSET_NAME, threshold, seg_length, fidx, threshold))
 
+    # collect predictions, convert to segmentation
     y_seg_preds = []
     y_slide_preds = []
     y_slide_trues = []
@@ -80,21 +84,18 @@ def model_eval(
     y_pred_flat = y_seg_preds.flatten().astype(np.int8)
     y_true_flat = y_seg_trues.flatten().astype(np.int8)
 
-    # print(classification_report(y_true_flat, y_pred_flat, target_names=["0", "1"]), file=report_file)
-    # print('\n', file=report_file)
-
     TPR, FPR = calc_TPR_FPR(y_true_flat, y_pred_flat)
 
     intersection = np.sum(y_pred_flat * y_true_flat)
     smooth = 0.0000001
     dice = (2. * intersection + smooth) / (np.sum(y_true_flat) + np.sum(y_pred_flat) + smooth)
-    # print('DICE: {}\n'.format(dice), file=report_file)
 
     n_transitions = 0
     for pred in y_seg_preds:
         n_transitions += len(get_edges(pred.flatten()))
     n_transitions /= y_seg_preds.shape[0]
 
+    # draw visualizations
     if plot_limit > 0 and prob_thresh == 0.5:
         pbar = tqdm(X_test[:plot_limit, :], leave=False)
         for idx, cam in enumerate(pbar):

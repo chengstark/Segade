@@ -16,10 +16,17 @@ tf.random.set_seed(1)
 
 
 def get_model(seg_length):
+    # """
+    # Construct model for CNN sliding window method
+    # :param seg_length: integer, sliding window length
+    # :return: keras model
+    # """
     """
-    Construct model for CNN sliding window method
-    :param seg_length: integer, sliding window length
-    :return: keras model
+    Construct model for CNN sliding window methods
+    :param seg_length: sliding window length
+    :type seg_length: int
+    :return: cnn sliding window model
+    :rtype: tf.keras.Model
     """
     ipt = Input((seg_length, 1))
     x = Conv1D(filters=64, kernel_size=10, activation='relu')(ipt)
