@@ -33,13 +33,16 @@ def model_train(
 ):
     """
     CNN_sliding window classifier training
-    :param train_amount: integer, training set size
-    :param val_amount: integer validation set size
-    :param threshold: float, range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
-    :param seg_length: integer, seconds*64Hz sampling rate, segment length/ sliding window length
-    :param epoch: integer, number of epoch
-    :param fidx: integer, fold index range(0, 10)
+    :param threshold: range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
+    :type threshold: float
+    :param seg_length: sliding window length
+    :type seg_length: int
+    :param epoch: number of epochs
+    :type epoch: int
+    :param fidx: fold index
+    :type fidx: int
     :return: None
+    :rtype: None
     """
     print('---------------------------Training Threshold {} Fold {}---------------------------'.format(threshold,
                                                                                                        fidx))
@@ -60,10 +63,6 @@ def model_train(
     y_val = np.load('data/y_val_{}_{}.npy'.format(threshold, fidx))
 
     print(X_train.shape)
-    # np.save(model_dir + '/blind_segs/blind_seg_X_train.npy', X_train)
-    # np.save(model_dir + '/blind_segs/blind_seg_y_train.npy', y_train)
-    # np.save(model_dir + '/blind_segs/blind_seg_X_val.npy', X_val)
-    # np.save(model_dir + '/blind_segs/blind_seg_y_val.npy', y_val)
 
     X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
     X_val = X_val.reshape(X_val.shape[0], X_val.shape[1], 1)
@@ -74,9 +73,11 @@ def model_train(
 
     def lrs(epoch):
         """
-        Keras custom learning rate scheduler
-        :param epoch: integer, epoch
-        :return: float, learning rate
+        Keras learning rate scheduler
+        :param epoch: epoch index
+        :type epoch: int
+        :return: learning rate
+        :rtype: float
         """
         if epoch < 20:
             lr = learning_rate
