@@ -23,6 +23,7 @@ for device in gpu_devices:
 def model_eval(fidx, TESTSET_NAME, filter_size=16, plot_limiter=20):
     """
     UNet model evaluation
+    :rtype: object
     :param fidx: integer, fold index range(0, 10)
     :param TESTSET_NAME: string, test set name, make sure to have this named folder in parent 'data/' directory
     :param filter_size: integer, UNet initial layer filter size
