@@ -22,13 +22,17 @@ for device in gpu_devices:
 
 def model_eval(fidx, TESTSET_NAME, filter_size=16, plot_limiter=20):
     """
-    UNet model evaluation
-    :rtype: object
-    :param fidx: integer, fold index range(0, 10)
-    :param TESTSET_NAME: string, test set name, make sure to have this named folder in parent 'data/' directory
-    :param filter_size: integer, UNet initial layer filter size
-    :param plot_limiter: integer, number of plots to generate (set to 0 if no plots are needed or to reduce processing time)
-    :return: float DICE score
+    SegMADe evaluation
+    :param fidx: fold index range(0, 10)
+    :type fidx: int
+    :param TESTSET_NAME: test set names
+    :type TESTSET_NAME: str
+    :param filter_size: SegMADe initial layer filter size
+    :type filter_size: int
+    :param plot_limiter: number of plots to generate (set to 0 if no plots are needed or to reduce processing time)
+    :type plot_limiter: int
+    :return: dice score, number of transitions
+    :rtype: float, float
     """
     working_dir = 'results/{}/{}/'.format(TESTSET_NAME, fidx)
 
@@ -44,7 +48,7 @@ def model_eval(fidx, TESTSET_NAME, filter_size=16, plot_limiter=20):
     y_true = np.load(data_dir + '/processed_dataset/seg_labels.npy')
 
     model_dir = 'model/{}/'.format(fidx)
-    unet = construct_unet(filter_size=filter_size)
+    unet = construct_SegMADe(filter_size=filter_size)
     unet.load_weights(model_dir + '/unet_best.h5')
     y_preds_ = unet.predict(X_test).squeeze()
     y_preds = y_preds_.copy()
@@ -90,15 +94,12 @@ def model_eval(fidx, TESTSET_NAME, filter_size=16, plot_limiter=20):
 
 
 if __name__ == '__main__':
-    for fidx in range(10):
-        model_eval(fidx, 'new_PPG_DaLiA_test', plot_limiter=20)
-        break
-    # working_dir = 'results/{}/{}/'.format('new_PPG_DaLiA_test', 0)
-    # p = np.load(working_dir+'/y_pred.npy')
-    # np.save('sampelsx20.npy', p[:20])
-    # print(p[:20].shape)
-    # for i, row in enumerate(p[:20]):
-    #     plt.plot(row)
-    #     plt.savefig('tmp/{}.jpg'.format(i))
-    #     plt.clf()
+    working_dir = 'results/{}/{}/'.format('new_PPG_DaLiA_test', 0)
+    p = np.load(working_dir+'/y_pred.npy')
+    np.save('sampelsx20.npy', p[:20])
+    print(p[:20].shape)
+    for i, row in enumerate(p[:20]):
+        plt.plot(row)
+        plt.savefig('tmp/{}.jpg'.format(i))
+        plt.clf()
 

@@ -23,10 +23,13 @@ tf.random.set_seed(1)
 
 def AC(y_true, y_pred):
     """
-    Active Contour loss, keras custom loss function
-    :param y_true: tensor, y_true
-    :param y_pred: tensor, y_pred
-    :return: tensor, active contour loss
+    SegMADe Active contour loss
+    :param y_true: y_true
+    :type y_true: tf.Tensor
+    :param y_pred: y_pred
+    :type y_pred: tf.Tensor
+    :return: Active contour loss
+    :rtype: tf.Tensor
     """
     x = y_pred[:, 1:, :] - y_pred[:, :-1, :]
     delta_x = x[:, :-2, :] ** 2
@@ -43,9 +46,11 @@ def AC(y_true, y_pred):
 
 def generate_sample_weight(y):
     """
-    Generate sample weight for training
-    :param y: array, ground truth
-    :return: array, sample weight
+    Helper function, calculate sample weight
+    :param y: y labels
+    :type y: np.ndarray
+    :return: sample weights
+    :rtype: np.ndarray
     """
     n0 = np.where(y == 0)[0].shape[0]
     n1 = np.where(y == 1)[0].shape[0]
@@ -61,32 +66,43 @@ def generate_sample_weight(y):
 
 
 def model_train(
-    fidx,
-    plot_model_to_img=False,
-    learning_rate=0.005,
-    n_epochs=200,
-    batch_size=64,
-    es_patience=15,
-    shuffle=False
+        fidx,
+        plot_model_to_img=False,
+        learning_rate=0.005,
+        n_epochs=200,
+        batch_size=64,
+        es_patience=15,
+        shuffle=False
 ):
     """
-
-    :param fidx: integer, fold index range(0, 10)
-    :param plot_model_to_img: bool, plot the model structure to image or not
-    :param learning_rate: float, initial learning rate
-    :param n_epochs: integer, number of training epochs
-    :param batch_size: integer, batch size
-    :param es_patience: integer, early stop patience
-    :param shuffle: bool, shuffle or not for keras training
-    :return: None 
+    Train SegMADe model
+    :param fidx: fold index
+    :type fidx: int
+    :param plot_model_to_img: plot model structure to image or not
+    :type plot_model_to_img: bool
+    :param learning_rate: learning rate
+    :type learning_rate: float
+    :param n_epochs: number of epochs to train
+    :type n_epochs: int
+    :param batch_size: batch size
+    :type batch_size: int
+    :param es_patience: number of epochs till early stop trigger
+    :type es_patience: int
+    :param shuffle: shuffle or not
+    :type shuffle: bool
+    :return: None
+    :rtype: None
     """
+
     print('-------------------------------Training Fold {}-------------------------------'.format(fidx))
 
     def lrs(epoch):
         """
-        Keras custom learning rate scheduler
-        :param epoch: integer, epoch
-        :return: float, learning rate
+        Keras learning rate scheduler
+        :param epoch: epoch index
+        :type epoch: int
+        :return: learning rate
+        :rtype: float
         """
         if epoch < 15:
             lr = learning_rate
@@ -98,10 +114,10 @@ def model_train(
 
     start_time = time.time()
     data_dir = str(Path(os.getcwd()).parent) + '/data_folds/new_PPG_DaLiA_train/'
-    X_train = np.load(data_dir+'/X_train_{}.npy'.format(fidx))
-    X_val = np.load(data_dir+'/X_val_{}.npy'.format(fidx))
-    y_seg_train = np.load(data_dir+'/y_seg_train_{}.npy'.format(fidx))
-    y_seg_val = np.load(data_dir+'/y_seg_val_{}.npy'.format(fidx))
+    X_train = np.load(data_dir + '/X_train_{}.npy'.format(fidx))
+    X_val = np.load(data_dir + '/X_val_{}.npy'.format(fidx))
+    y_seg_train = np.load(data_dir + '/y_seg_train_{}.npy'.format(fidx))
+    y_seg_val = np.load(data_dir + '/y_seg_val_{}.npy'.format(fidx))
 
     X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
     X_val = X_val.reshape((X_val.shape[0], X_val.shape[1], 1))
@@ -121,22 +137,30 @@ def model_train(
     sample_weight_train = generate_sample_weight(y_seg_train.squeeze())
     sample_weight_val = generate_sample_weight(y_seg_val.squeeze())
 
-
-    unet = construct_unet(filter_size=16)
+    SegMADe = construct_SegMADe(filter_size=16)
 
     def dice_metric(y_true, y_pred):
+        """
+        DICE score calculator
+        :param y_true: true labels
+        :type y_true: np.ndarray
+        :param y_pred: predicted labels
+        :type y_pred: np.ndarray
+        :return: dice score
+        :rtype: float
+        """
         intersection = K.sum(y_pred * y_true)
         smooth = 0.0001
         dice = (2. * intersection + smooth) / (K.sum(y_true) + K.sum(y_pred) + smooth)
         return dice
 
-    unet.compile(
-        optimizer=Adam(learning_rate=0.0005),
+    SegMADe.compile(
+        optimizer=Adam(learning_rate),
         metrics=[dice_metric],
         loss=AC
     )
 
-    history = unet.fit(
+    history = SegMADe.fit(
         x=X_train,
         y=y_seg_train,
         epochs=n_epochs,
@@ -148,9 +172,8 @@ def model_train(
         sample_weight=sample_weight_train
     )
 
-
     if plot_model_to_img:
-        plot_model(unet, show_shapes=True, show_layer_names=True,
+        plot_model(SegMADe, show_shapes=True, show_layer_names=True,
                    to_file=model_dir + '/model_plot.jpg')
 
     plot_history(history)
@@ -174,6 +197,3 @@ if __name__ == '__main__':
             n_epochs=200,
             batch_size=64
         )
-
-
-

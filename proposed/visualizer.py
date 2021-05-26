@@ -10,23 +10,15 @@ for device in gpu_devices:
     tf.config.experimental.set_memory_growth(device, True)
 
 
-def print_arr(arr, n):
-    s = '->'.format(n)
-    idx = 0
-    for a in arr:
-        if a == 1:
-            s += '|{}|'.format(a)
-        elif a == -1:
-            s += '{},'.format(a)
-        else:
-            s += ' {},'.format(a)
-        idx += 1
-    s += ' {}'.format(n)
-    print(s)
-
-
 def get_edges(label):
-    label = label.flatten( )
+    """
+    Get edges of segmentation labels
+    :param label: segmentation label
+    :type label: np.ndarray
+    :return: edges of segmentation labels
+    :rtype: list(int, int)
+    """
+    label = label.flatten()
     ref = label[1:] - label[:-1]
     base = np.zeros_like(label)
     base[np.where(ref == 1)[0]+1] = 1
@@ -57,7 +49,52 @@ def get_edges(label):
 
 def plot_result(ppg, true_label, pred_label=None, show=True, raw_prediction=None, save=True,
                 save_path=None, plot_prob=False, plot_true_only=False, additional_title=''):
+    """
+    Segmentation result visualizer
+    :param ppg: ppg signals
+    :type ppg: np.ndarray
+    :param true_label: segmentation true label
+    :type true_label: np.ndarray
+    :param pred_label:  segmentation prediction label
+    :type pred_label: np.ndarray
+    :param show: display the plot or not
+    :type show: bool
+    :param prob: raw model output
+    :type prob: np.ndarray
+    :param save: save the plot or not
+    :type save: bool
+    :param save_path: save path
+    :type save_path: str
+    :param plot_prob: plot raw output or not
+    :type plot_prob: bool
+    :param plot_true_only: plot true labels only or not
+    :type plot_true_only: bool
+    :return: None
+    :rtype: None
+    """
     def plot_on_ax(ppg, label, ax, title='', color='g', overlay=False, label2=None, color2='y'):
+        """
+        Plot signal and label on axis
+        :param ppg: ppg signals
+        :type ppg: np.ndarray
+        :param label: segmentation label
+        :type label: np.ndarray
+        :param ax: axis to be plotted
+        :type ax: matplotlib.axes
+        :param title: title
+        :type title: str
+        :param color: matplotlib color for true label
+        :type color: str0
+        :param overlay:
+        :type overlay: bool
+        :param label2: segmentation label
+        :type label2: np.ndarray
+        :param color2: matplotlib color for predicted label
+        :type color2: str
+        :return: None
+        :rtype: None
+        """
+
         ax.plot(ppg)
         ax.margins(x=0, y=0)
 
@@ -126,6 +163,13 @@ def plot_result(ppg, true_label, pred_label=None, show=True, raw_prediction=None
 
 
 def visualize(plot_prob):
+    """
+    Visualize some samples and results
+    :param plot_prob: plot raw model prediction or not
+    :type plot_prob: bool
+    :return: None
+    :rtype: None
+    """
     working_dir = 'results'
     plot_dir = working_dir + '/plots/'
 
@@ -138,7 +182,7 @@ def visualize(plot_prob):
     X_val = np.load(working_dir + '/processed_dataset/scaled_ppgs.npy')
     y_true = np.load(working_dir + '/processed_dataset/seg_labels.npy')
 
-    unet = construct_unet(filter_size=16)
+    unet = construct_SegMADe(filter_size=16)
     unet.load_weights(working_dir + '/model_weights/unet_best.h5')
     y_pred = unet.predict(X_val).squeeze()
     y_pred_raw = y_pred

@@ -10,9 +10,12 @@ np.random.seed(1)
 def perf_measure(y_actual, y_hat):
     """
     Calculate TP, FP, TN, FN
-    :param y_true: numpy array or list, true labels
-    :param y_pred: numpy array or list, predicted labels
-    :return: integers, TP, FP, TN, FN
+    :param y_true: true labels
+    :type y_true: np.ndarray
+    :param y_pred: predicted labels
+    :type y_pred: np.ndarray
+    :return: TP, FP, TN, FN
+    :rtype: int, int, int, int
     """
     TP = 0
     FP = 0
@@ -33,6 +36,15 @@ def perf_measure(y_actual, y_hat):
 
 
 def calc_TPR_FPR(y_trues_flat, y_preds_flat):
+    """
+    Calculate TPR and FPR
+    :param y_trues_flat: true labels
+    :type y_trues_flat: np.ndarray
+    :param y_preds_flat: predicted labels
+    :type y_preds_flat: np.ndarray
+    :return: TPR, FPR
+    :rtype: float
+    """
     TP, FP, TN, FN = perf_measure(y_trues_flat, y_preds_flat)
     if TP == 0:
         TPR = 0.0
@@ -47,6 +59,15 @@ def calc_TPR_FPR(y_trues_flat, y_preds_flat):
 
 
 def sort_TPRs_FPRs(TPR, FPR):
+    """
+    Sort TPR by FPR
+    :param TPR: TPRs
+    :type TPR: list(float)
+    :param FPR: FPRs
+    :type FPR: list(float)
+    :return: sorted_TPR, sorted_FPR
+    :rtype: list(float), list(float)
+    """
     sorted_TPR = [x for _, x in sorted(zip(FPR.tolist(), TPR.tolist()))]
     sorted_FPR = [x for x, _ in sorted(zip(FPR.tolist(), TPR.tolist()))]
     return sorted_TPR, sorted_FPR
@@ -55,8 +76,10 @@ def sort_TPRs_FPRs(TPR, FPR):
 def check_mkdir(dir_):
     """
     Check if the directory exists, if not create this directory
-    :param dir_: string, target directory
+    :param dir_: target directory
+    :type dir_: str
     :return: None
+    :rtype: None
     """
     if not os.path.isdir(dir_):
         os.mkdir(dir_)
@@ -65,10 +88,14 @@ def check_mkdir(dir_):
 def plot_confusion_matrix(cm, index=[0, 1, 2], columns=[0, 1, 2]):
     """
     Plot confusion matrix
-    :param cm: array, confusion matrix
-    :param index: list, index
-    :param columns: list, columns
+    :param cm: confusion matrix
+    :type cm: np.ndarray
+    :param index: index
+    :type index: list
+    :param columns: columns
+    :type columns: list
     :return: None
+    :rtype: None
     """
     df_cm = pd.DataFrame(cm, index=index,
                          columns=columns)
@@ -79,9 +106,12 @@ def plot_confusion_matrix(cm, index=[0, 1, 2], columns=[0, 1, 2]):
 def shrink_data(X, n_th=3):
     """
     Brute force shrink a signal, delete every n th element
-    :param X: array, signal
-    :param n_th: integer, n th element to remove
-    :return: array, processed signal
+    :param X: signal
+    :type X: np.ndarray
+    :param n_th: n th element to remove
+    :type n_th: int
+    :return: shrinked signal
+    :rtype: np.ndarray
     """
     deleted = np.delete(X, np.arange(0, X.shape[1], n_th), axis=1)
     return deleted
@@ -91,8 +121,11 @@ def plot_history(history):
     """
     Plot keras training history
     :param history: keras history
+    :type history: tf.keras.callbacks.History
     :return: None
+    :rtype: None
     """
+
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 7))
 
     ax1.plot(history.history['dice_metric'])
