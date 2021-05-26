@@ -8,10 +8,14 @@ import time
 def post_process(dtw_threshold, fidx, TESTSET_NAME):
     """
     Post process the template matching method, make predictions
-    :param dtw_threshold: integer, dynamic time warping threshold
-    :param fidx: integer, fold index range(0, 10)
-    :param TESTSET_NAME: string, test set name, make sure to have this named folder in parent 'data/' directory
+    :param dtw_threshold: dynamic time warping threshold
+    :type dtw_threshold: int
+    :param fidx: fold index
+    :type fidx: int
+    :param TESTSET_NAME: test set name, make sure to have this named folder in parent 'data/' directory
+    :type TESTSET_NAME: str
     :return: None
+    :rtype: None
     """
 
     data_dir = str(Path(os.getcwd()).parent) + '/data/{}/'.format(TESTSET_NAME)

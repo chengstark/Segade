@@ -15,8 +15,10 @@ np.random.seed(1)
 def check_mkdir(dir_):
     """
     Check if the directory exists, if not create this directory
-    :param dir_: string, target directory
+    :param dir_: target directory
+    :type dir_: str
     :return: None
+    :rtype: None
     """
     if not os.path.isdir(dir_):
         os.mkdir(dir_)
@@ -25,9 +27,12 @@ def check_mkdir(dir_):
 def perf_measure(y_actual, y_hat):
     """
     Calculate TP, FP, TN, FN
-    :param y_true: numpy array or list, true labels
-    :param y_pred: numpy array or list, predicted labels
-    :return: integers, TP, FP, TN, FN
+    :param y_true: true labels
+    :type y_true: np.ndarray
+    :param y_pred: predicted labels
+    :type y_pred: np.ndarray
+    :return: TP, FP, TN, FN
+    :rtype: int, int, int, int
     """
     TP = 0
     FP = 0
@@ -48,6 +53,15 @@ def perf_measure(y_actual, y_hat):
 
 
 def calc_TPR_FPR(y_trues_flat, y_preds_flat):
+    """
+    Calculate TPR and FPR
+    :param y_trues_flat: true labels
+    :type y_trues_flat: np.ndarray
+    :param y_preds_flat: predicted labels
+    :type y_preds_flat: np.ndarray
+    :return: TPR, FPR
+    :rtype: float
+    """
     TP, FP, TN, FN = perf_measure(y_trues_flat, y_preds_flat)
     if TP == 0:
         TPR = 0.0
@@ -61,6 +75,15 @@ def calc_TPR_FPR(y_trues_flat, y_preds_flat):
 
 
 def sort_TPRs_FPRs(TPR, FPR):
+    """
+    Sort TPR by FPR
+    :param TPR: TPRs
+    :type TPR: list(float)
+    :param FPR: FPRs
+    :type FPR: list(float)
+    :return: sorted_TPR, sorted_FPR
+    :rtype: list(float), list(float)
+    """
     sorted_TPR = [x for _, x in sorted(zip(FPR.tolist(), TPR.tolist()))]
     sorted_FPR = [x for x, _ in sorted(zip(FPR.tolist(), TPR.tolist()))]
     return sorted_TPR, sorted_FPR
@@ -69,8 +92,10 @@ def sort_TPRs_FPRs(TPR, FPR):
 def pulse_segmentation(ppg):
     """
     Pulse segmentation
-    :param ppg: array, ppg signal
-    :return: list, segmented pulses [[start, end], [start, end], [start, end]...]
+    :param ppg: ppg signal
+    :type ppg: np.ndarray
+    :return: segmented pulses [[start, end], [start, end], [start, end]...]
+    :rtype: list/ list(list(int))
     """
     pos_peaks, _ = find_peaks(ppg, width=10)
     neg_peaks, _ = find_peaks(1 - ppg, width=10)
@@ -98,9 +123,12 @@ def pulse_segmentation(ppg):
 def create_template(n, fidx):
     """
     Create templates for template matching and save templates
-    :param n: integer, number of templates
-    :param fidx: integer, fold index range(0, 10)
+    :param n: number of templates
+    :type n: int
+    :param fidx: fold index
+    :type fidx: int
     :return: None
+    :rtype: None
     """
     if not os.path.isdir('templates/{}/'.format(fidx)):
         os.mkdir('templates/{}/'.format(fidx))
@@ -132,9 +160,12 @@ def create_template(n, fidx):
 def match_template(pulse_seg, fidx):
     """
     Match the templates, calculate the smallest DTW distance
-    :param pulse_seg: list, segmented pulses
-    :param fidx: integer, fold index range(0, 10)
-    :return: integer, minimum distances; integer, index of the templates; lists, templates
+    :param pulse_seg: segmented pulses
+    :type pulse_seg: list
+    :param fidx: fold index
+    :type fidx: int
+    :return: minimum distances, index of the templates, templates
+    :rtype: int, int, list(list(int))
     """
     templates = []
     for template_filename in os.listdir('templates'):
@@ -151,10 +182,14 @@ def match_template(pulse_seg, fidx):
 def make_predictions(ppg, dtw_thresh, fidx):
     """
     Match the templates, applying threshold on the calculated DTW distances
-    :param ppg: array, ppg signals
-    :param dtw_thresh: integer, DTW threshold
-    :param fidx: integer, fold index range(0, 10)
-    :return: array, segmentation prediction labels
+    :param ppg: ppg signals
+    :type ppg: np.ndarray
+    :param dtw_thresh: DTW threshold
+    :type dtw_thresh: int
+    :param fidx: fold index
+    :type fidx: int
+    :return: segmentation prediction labels
+    :rtype: np.ndarray
     """
     pulses = pulse_segmentation(ppg)
     y_base = np.zeros_like(ppg)

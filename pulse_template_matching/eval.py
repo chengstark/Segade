@@ -13,11 +13,16 @@ from visualizer import *
 def template_eval(dtw_thresh, plot_limiter, fidx, TESTSET_NAME):
     """
     Pulse template matching evaluation
-    :param dtw_thresh: integer, dynamic time warping threshold
-    :param plot_limiter: integer, number of plots to generate (set to 0 if no plots are needed or to reduce processing time)
-    :param fidx: integer, fold index range(0, 10)
-    :param TESTSET_NAME: string, test set name, make sure to have this named folder in parent 'data/' directory
-    :return: TPR, FPR, DICE score
+    :param dtw_thresh: dynamic time warping threshold
+    :type dtw_thresh: int
+    :param plot_limiter: number of plots to generate (set to 0 if no plots are needed or to reduce processing time)
+    :type plot_limiter: int
+    :param fidx: fold index
+    :type fidx: int
+    :param TESTSET_NAME: test set name
+    :type TESTSET_NAME: str
+    :return: TPR, FPR, number of transitions
+    :rtype: float, float, int
     """
 
     working_dir = 'results/{}/{}/dtw_thresh_{}/'.format(TESTSET_NAME, fidx, dtw_thresh)

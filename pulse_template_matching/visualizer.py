@@ -11,8 +11,10 @@ from scipy.signal import find_peaks
 def get_edges(label):
     """
     Get edges of segmentation labels
-    :param label: array. segmentation label
-    :return: list, edges of segmentation labels
+    :param label: segmentation label
+    :type label: np.ndarray
+    :return: edges of segmentation labels
+    :rtype: list(int, int)
     """
     label = label.flatten( )
     ref = label[1:] - label[:-1]
@@ -47,29 +49,48 @@ def plot_result(ppg, true_label, pred_label=None, show=True, raw_prediction=None
                 save_path=None, plot_prob=False, plot_true_only=False):
     """
     Segmentation result visualizer
-    :param ppg: array, ppg signals
-    :param true_label: array, segmentation true label
-    :param pred_label: array, segmentation prediction
-    :param show: bool, display the plot or not
-    :param raw_prediction: array, prediction probabilities or cams
-    :param save: bool, save the plot or not, if save is true, save path should be specified
-    :param save_path: string, save path
-    :param plot_prob: bool, plot probability or not
-    :param plot_true_only: bool, only plot ground truth or not
+    :param ppg: ppg signals
+    :type ppg: np.ndarray
+    :param true_label: segmentation true label
+    :type true_label: np.ndarray
+    :param pred_label:  segmentation prediction label
+    :type pred_label: np.ndarray
+    :param show: display the plot or not
+    :type show: bool
+    :param raw_prediction: raw model output
+    :type raw_prediction: np.ndarray
+    :param save: save the plot or not
+    :type save: bool
+    :param save_path: save path
+    :type save_path: str
+    :param plot_prob: plot raw output or not
+    :type plot_prob: bool
+    :param plot_true_only: plot true labels only or not
+    :type plot_true_only: bool
     :return: None
+    :rtype: None
     """
     def plot_on_ax(ppg, label, ax, title='', color='g', overlay=False, label2=None, color2='y'):
         """
         Plot signal and label on axis
-        :param ppg: array, ppg signals
-        :param label: array, segmentation label
-        :param ax: matplotlib axis
-        :param title: string, title
-        :param color: matplotlib color
-        :param overlay: bool, overlay ground truth on predictions or not
-        :param label2: array, second label array. If overlay is true, this must be specified
-        :param color2: matplotlib color for the second label. If overlay is true, this must be specified
+        :param ppg: ppg signals
+        :type ppg: np.ndarray
+        :param label: segmentation label
+        :type label: np.ndarray
+        :param ax: axis to be plotted
+        :type ax: matplotlib.axes
+        :param title: title
+        :type title: str
+        :param color: matplotlib color for true label
+        :type color: str0
+        :param overlay:
+        :type overlay: bool
+        :param label2: segmentation label
+        :type label2: np.ndarray
+        :param color2: matplotlib color for predicted label
+        :type color2: str
         :return: None
+        :rtype: None
         """
         ax.plot(ppg)
         ax.margins(x=0, y=0)
@@ -144,8 +165,10 @@ def plot_result(ppg, true_label, pred_label=None, show=True, raw_prediction=None
 def visualize(dtw_thresh):
     """
     Visualize examples with different DTW thresholds
-    :param dtw_thresh: integer, DTW thresholds
+    :param dtw_thresh: DTW threshold
+    :type dtw_thresh: int
     :return: None
+    :rtype: None
     """
     working_dir = 'dtw_thresh_{}/'.format(dtw_thresh)
 
