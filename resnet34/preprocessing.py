@@ -9,11 +9,16 @@ from utils import *
 def process_data(fidx, threshold, TESTSET_NAME, process_test_only=False):
     """
     Resnet34 pre processing data
-    :param fidx: integer, fold index range(0, 10)
-    :param threshold: float, range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
-    :param TESTSET_NAME: string, test set name, make sure to have this named folder in parent 'data/' directory
-    :param process_test_only: bool, process only testset. Set to true when processing independent test sets
+    :param fidx: fold index range(0, 10)
+    :type fidx: int
+    :param threshold: range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
+    :type threshold: float
+    :param TESTSET_NAME: test set name
+    :type TESTSET_NAME: str
+    :param process_test_only: process only testset. Set to true when processing independent test sets
+    :type process_test_only: bool
     :return: None
+    :rtype: None
     """
 
     data_dir_train = str(Path(os.getcwd()).parent) + '/data_folds/'
@@ -24,7 +29,6 @@ def process_data(fidx, threshold, TESTSET_NAME, process_test_only=False):
 
     if not process_test_only:
 
-        # print(X_train.shape, X_val.shape, y_seg_train.shape, y_seg_val.shape)
         y_class_train = []
         y_class_val = []
         for row in y_seg_train:

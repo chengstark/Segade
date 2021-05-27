@@ -1,5 +1,5 @@
 import numpy as np
-from unet.utils import *
+from proposed.utils import *
 from tqdm import tqdm
 import sys
 from scipy.signal import find_peaks
@@ -16,7 +16,7 @@ cnn_slider_result = 'cnn_slider/results/{}/thresh_0.0_seg_length_192/{}/'.format
 pulsetm_result = 'pulse_template_matching/results/{}/{}/dtw_thresh_1/'.format(TESTSET_NAME, 0)+'/y_pred_1.npy'
 res34_cam_result = 'resnet34/results/{}/thresh_{}/{}/'.format(TESTSET_NAME, 0.0, 0)+'y_seg_preds_{}_{}_{}_{}.npy'.format('cam', 0, 0.0, 0.0)
 res34_shap_result = 'resnet34/results/{}/thresh_{}/{}/'.format(TESTSET_NAME, 0.0, 0)+'y_seg_preds_{}_{}_{}_{}.npy'.format('shap', 0, 0.0, 0.0)
-unet_result = 'unet/results/{}/{}/'.format(TESTSET_NAME, 0) + '/y_pred.npy'
+SegMADe = 'proposed/results/{}/{}/'.format(TESTSET_NAME, 0) + '/y_pred.npy'
 # print(cnn_slider_result, os.path.exists(cnn_slider_result))
 if os.path.exists(cnn_slider_result):
     y_seg_cnnslider = np.load(cnn_slider_result)
@@ -47,14 +47,14 @@ else:
     y_seg_res34_shap = np.zeros_like(y_seg_true)
     res34_shap_title = 'NO Resnet34 CAM Label'
 
-if os.path.exists(unet_result):
-    y_seg_unet = np.load(unet_result)
-    y_seg_unet[y_seg_unet > 0.5] = 1
-    y_seg_unet[y_seg_unet <= 0.5] = 0
-    unet_title = 'UNet Label'
+if os.path.exists(SegMADe):
+    y_seg_SegMADe = np.load(SegMADe)
+    y_seg_SegMADe[y_seg_SegMADe > 0.5] = 1
+    y_seg_SegMADe[y_seg_SegMADe <= 0.5] = 0
+    SegMADe_title = 'SegMADe Label'
 else:
-    y_seg_unet = np.zeros_like(y_seg_true)
-    unet_title = 'NO UNet Label'
+    y_seg_SegMADe = np.zeros_like(y_seg_true)
+    SegMADe_title = 'NO SegMADe Label'
 
 
 def calc_dice(y_true_flat, y_pred_flat):
@@ -161,8 +161,8 @@ def plot_on_ax_pulse_tm(ppg, label, ax, title='', color='g', overlay=False, labe
 def vis_one(ppg, idx):
     fig, (ax1, ax2, ax3, ax4, ax5, ax6) = plt.subplots(nrows=6, ncols=1, figsize=(15, 7))
     plot_on_ax(ppg, y_seg_true[idx], title='Human Label', overlay=False, ax=ax1)
-    plot_on_ax(ppg, y_seg_unet[idx],
-               title=unet_title + ' DICE: {}'.format(round(calc_dice(y_seg_true[idx], y_seg_unet[idx]), 4)),
+    plot_on_ax(ppg, y_seg_SegMADe[idx],
+               title=SegMADe_title + ' DICE: {}'.format(round(calc_dice(y_seg_true[idx], y_seg_SegMADe[idx]), 4)),
                overlay=False, ax=ax2)
     plot_on_ax(ppg, y_seg_cnnslider[idx],
                title=cnnslider_title + ' DICE: {}'.format(round(calc_dice(y_seg_true[idx], y_seg_cnnslider[idx]), 4)),
@@ -190,26 +190,3 @@ for idx, ppg in enumerate(X_test):
 pool = Pool()
 pool.starmap(vis_one, pool_args)
 pool.terminate()
-
-# for idx, ppg in enumerate(tqdm(X_test)):
-#     fig, (ax1, ax2, ax3, ax4, ax5, ax6) = plt.subplots(nrows=6, ncols=1, figsize=(36, 9))
-#     plot_on_ax(ppg, y_seg_true[idx], title='Human Label', overlay=False, ax=ax1)
-#     plot_on_ax(ppg, y_seg_unet[idx],
-#                title=unet_title + ' DICE: {}'.format(round(calc_dice(y_seg_true[idx], y_seg_unet[idx]), 4)),
-#                overlay=False, ax=ax2)
-#     plot_on_ax_pulse_tm(ppg, y_seg_pulse_tm[idx],
-#                title=pulsetm_title + ' DICE: {}'.format(round(calc_dice(y_seg_true[idx], y_seg_pulse_tm[idx]), 4)),
-#                overlay=False, ax=ax3)
-#     plot_on_ax(ppg, y_seg_cnnslider[idx],
-#                title=cnnslider_title + ' DICE: {}'.format(round(calc_dice(y_seg_true[idx], y_seg_cnnslider[idx]), 4)),
-#                overlay=False, ax=ax4)
-#     plot_on_ax(ppg, y_seg_res34_cam[idx],
-#                title=res34_cam_title + ' DICE: {}'.format(round(calc_dice(y_seg_true[idx], y_seg_res34_cam[idx]), 4)),
-#                overlay=False, ax=ax5)
-#     plot_on_ax(ppg, y_seg_res34_shap[idx],
-#                title=res34_shap_title + ' DICE: {}'.format(round(calc_dice(y_seg_true[idx], y_seg_res34_shap[idx]), 4)),
-#                overlay=False, ax=ax6)
-#     plt.tight_layout()
-#     plt.savefig('visualize_all/{}/{}.jpg'.format(TESTSET_NAME, idx))
-#     plt.close()
-#     plt.close('all')

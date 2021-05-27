@@ -105,20 +105,6 @@ def plot_confusion_matrix(cm, index=[0, 1, 2], columns=[0, 1, 2]):
     sn.heatmap(df_cm, annot=True)
 
 
-def shrink_data(X, n_th=3):
-    """
-    Brute force shrink a signal, delete every n th element
-    :param X: signal
-    :type X: np.ndarray
-    :param n_th: n th element to remove
-    :type n_th: int
-    :return: shrinked signal
-    :rtype: np.ndarray
-    """
-    shrinked = np.delete(X, np.arange(0, X.shape[1], n_th), axis=1)
-    return shrinked
-
-
 def plot_history(history):
     """
     Plot keras training history

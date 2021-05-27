@@ -22,8 +22,6 @@ from tqdm import tqdm
 from pathlib import Path
 from visualizer import *
 from multiprocessing import Pool
-from vis import utils as vis_utils
-from vis.visualization import visualize_cam
 from keras import activations
 import keras
 import time
@@ -33,28 +31,32 @@ from scipy.ndimage.filters import gaussian_filter1d
 
 def evaluate(fidx, working_dir, threshold, prob_thresh, plot_limit, TESTSET_NAME, runshap):
     """
-    Resnet34 evaluation with cams
-    :param fidx: integer, fold index range(0, 10)
-    :param working_dir: string, location/ directory to store fold evaluation results
-    :param threshold: float, range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
-    :param prob_thresh: float, range(0, 11, 1), probability threshold to calculate ROC
-    :param plot_limit: integer, number of plots to generate (set to 0 if no plots are needed or to reduce processing time)
-    :param TESTSET_NAME: string, test set name, make sure to have this named folder in parent 'data/' directory
-    :return: TPR, FPR, DICE score
+    Resnet34 evaluation
+    :param fidx: fold index
+    :type fidx: int
+    :param working_dir: location/ directory to store fold evaluation results
+    :type working_dir: str
+    :param threshold: range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
+    :type threshold: float
+    :param prob_thresh: range(0, 11, 1), probability threshold to calculate ROC
+    :type prob_thresh: float
+    :param plot_limit: number of plots to generate (set to 0 if no plots are needed or to reduce processing time)
+    :type plot_limit: int
+    :param TESTSET_NAME: test set name
+    :type TESTSET_NAME: str
+    :param runshap: run shap evaluation or not
+    :type runshap: bool
+    :return: TRP, FPR, DICE score
+    :rtype: float, float, float
     """
 
     def process_y_seg_preds(y_seg_test, y_seg_preds, probs, explainer, plot_limit):
         y_seg_preds_flat = y_seg_preds.flatten().astype(np.int8)
         y_seg_trues_flat = y_seg_test.flatten().astype(np.int8)
 
-        # print(classification_report(y_seg_trues_flat, y_seg_preds_flat, target_names=["0", "1"]), file=report_file)
-        # print('\n', file=report_file)
-
         intersection = np.sum(y_seg_preds_flat * y_seg_trues_flat)
         smooth = 0.0000001
         dice = (2. * intersection + smooth) / (np.sum(y_seg_trues_flat) + np.sum(y_seg_preds_flat) + smooth)
-        # if explainer == 'shap':
-        #     print('dice: ', fidx, threshold, prob_thresh, dice)
         TPR, FPR = calc_TPR_FPR(y_seg_trues_flat, y_seg_preds_flat)
 
         n_transitions = 0
@@ -121,19 +123,13 @@ def evaluate(fidx, working_dir, threshold, prob_thresh, plot_limit, TESTSET_NAME
         y_seg_preds_shaps = shaps.copy()
         y_seg_preds_shaps[y_seg_preds_shaps > prob_thresh] = 1
         y_seg_preds_shaps[y_seg_preds_shaps <= prob_thresh] = 0
-        # for idx, shap_ in enumerate(smoothed_shaps):
-        #     shap_seg = shap_.copy()
-        #     shap_seg[shap_seg > prob_thresh] = 1
-        #     shap_seg[shap_seg <= prob_thresh] = 0
-        #     y_seg_preds_shaps.append(shap_seg)
-        # y_seg_preds_shaps = np.asarray(y_seg_preds_shaps)
         np.save(working_dir + 'y_seg_preds_{}_{}_{}_{}.npy'.format('shap', fidx, threshold, prob_thresh),
                 y_seg_preds_shaps)
         TPR_shap, FPR_shap, dice_shap, n_transitions_shap = process_y_seg_preds(y_seg_test, y_seg_preds_shaps,
                                                                                 shaps, 'shap', plot_limit)
 
     TPR_cam, FPR_cam, dice_cam, n_transitions_cam = process_y_seg_preds(y_seg_test, y_seg_preds_cams, cams, 'cam', plot_limit)
-    # print(fidx, threshold, prob_thresh, dice_shap)
+
     return TPR_cam, FPR_cam, dice_cam, n_transitions_cam, TPR_shap, FPR_shap, dice_shap, n_transitions_shap, fidx, threshold, prob_thresh
 
 

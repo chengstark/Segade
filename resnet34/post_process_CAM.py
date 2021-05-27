@@ -16,11 +16,15 @@ from keras import Model
 
 def post_process_CAM(fidx, threshold, TESTSET_NAME):
     """
-    Resnet34 post processing
-    :param fidx: integer, fold index range(0, 10)
-    :param threshold: float, range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
-    :param TESTSET_NAME: string, test set name, make sure to have this named folder in parent 'data/' directory
+    Resnet34 post processing for Grad CAM
+    :param fidx: fold index range(0, 10)
+    :type fidx: int
+    :param threshold: range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
+    :type threshold: float
+    :param TESTSET_NAME: test set name
+    :type TESTSET_NAME: str
     :return: None
+    :rtype: None
     """
 
     working_dir = 'results/{}/thresh_{}/{}/'.format(TESTSET_NAME, threshold, fidx)

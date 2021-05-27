@@ -13,8 +13,8 @@ import time
 from utils import *
 import pickle as pkl
 from model import *
-from augmentation import *
 from keras import backend as K
+import random
 from pathlib import Path
 
 
@@ -25,10 +25,13 @@ tf.random.set_seed(1)
 
 def AC_highL(y_true, y_pred):
     """
-    Active Contour loss, keras custom loss function
-    :param y_true: tensor, y_true
-    :param y_pred: tensor, y_pred
-    :return: tensor, active contour loss
+    Active contour lambda_t tests
+    :param y_true: y_true
+    :type y_true: tf.Tensor
+    :param y_pred: y_pred
+    :type y_pred: tf.Tensor
+    :return: Active contour loss
+    :rtype: tf.Tensor
     """
     x = y_pred[:, 1:, :] - y_pred[:, :-1, :]
     delta_x = x[:, :-2, :] ** 2
@@ -40,11 +43,22 @@ def AC_highL(y_true, y_pred):
     region_in = K.abs(K.mean(y_pred * ((y_true - c1) ** 2), axis=1))
     region_out = K.abs(K.mean((1 - y_pred) * ((y_true - c2) ** 2), axis=1))
 
-
     return 6 * length + (region_in + region_out)
 
 
 def DICE(y_true, y_pred, smooth=0.0000001):
+    """
+    DICE loss
+    :param y_true: y_true
+    :type y_true: tf.Tensor
+    :param y_pred: y_pred
+    :type y_pred: tf.Tensor
+    :param smooth: smoothing avoid zero division
+    :type smooth: float
+    :return: DICE loss
+    :rtype: tf.Tensor
+    """
+
     intersection = K.sum(K.abs(y_true * y_pred), axis=1)
     union = K.sum(K.square(y_true), axis=1) + K.sum(K.square(y_pred), axis=1)
     dice_loss = 1 - (2. * intersection + smooth) / (union + smooth)
@@ -53,6 +67,17 @@ def DICE(y_true, y_pred, smooth=0.0000001):
 
 
 def JAC(y_true, y_pred, smooth=0.0000001):
+    """
+    JAC loss
+    :param y_true: y_true
+    :type y_true: tf.Tensor
+    :param y_pred: y_pred
+    :type y_pred: tf.Tensor
+    :param smooth: smoothing avoid zero division
+    :type smooth: float
+    :return: JAC loss
+    :rtype: tf.Tensor
+    """
     intersection = K.sum(K.abs(y_true * y_pred), axis=1)
     sum_ = K.sum(K.abs(y_true) + K.abs(y_pred), axis=1)
     jac = (intersection + smooth) / (sum_ - intersection + smooth)
@@ -61,9 +86,11 @@ def JAC(y_true, y_pred, smooth=0.0000001):
 
 def generate_sample_weight(y):
     """
-    Generate sample weight for training
-    :param y: array, ground truth
-    :return: array, sample weight
+    Helper function, calculate sample weight
+    :param y: y labels
+    :type y: np.ndarray
+    :return: sample weights
+    :rtype: np.ndarray
     """
     n0 = np.where(y == 0)[0].shape[0]
     n1 = np.where(y == 1)[0].shape[0]
@@ -87,32 +114,36 @@ def model_train(
     es_patience=15,
     shuffle=False,
     use_aug=False,
-    aug_slices=0,
-    aug_stitch_impact_range=0,
-    aug_amount=0,
 ):
     """
-
-    :param fidx: integer, fold index range(0, 10)
-    :param plot_model_to_img: bool, plot the model structure to image or not
-    :param learning_rate: float, initial learning rate
-    :param n_epochs: integer, number of training epochs
-    :param batch_size: integer, batch size
-    :param es_patience: integer, early stop patience
-    :param shuffle: bool, shuffle or not for keras training
-    :param use_aug: bool, use augmentation or not
-    :param aug_slices: integer, number slices for each augmented signal
-    :param aug_stitch_impact_range: integer, effect range of the stitching of slices of segments in augmentation process
-    :param aug_amount: integer, number of augmentations
+    Train SegMADe model
+    :param fidx: fold index
+    :type fidx: int
+    :param plot_model_to_img: plot model structure to image or not
+    :type plot_model_to_img: bool
+    :param learning_rate: learning rate
+    :type learning_rate: float
+    :param n_epochs: number of epochs to train
+    :type n_epochs: int
+    :param batch_size: batch size
+    :type batch_size: int
+    :param es_patience: number of epochs till early stop trigger
+    :type es_patience: int
+    :param shuffle: shuffle or not
+    :type shuffle: bool
     :return: None
+    :rtype: None
     """
+
     print('-------------------------------Training Fold {}-------------------------------'.format(fidx))
 
     def lrs(epoch):
         """
-        Keras custom learning rate scheduler
-        :param epoch: integer, epoch
-        :return: float, learning rate
+        Keras learning rate scheduler
+        :param epoch: epoch index
+        :type epoch: int
+        :return: learning rate
+        :rtype: float
         """
         if epoch < 15:
             lr = learning_rate
@@ -142,21 +173,9 @@ def model_train(
     if not os.path.isdir(model_dir + '/augmentations/') and use_aug:
         os.mkdir(model_dir + '/augmentations/')
 
-    if use_aug:
-        if not os.path.isdir(model_dir + '/aug_plots/'):
-            os.mkdir(model_dir + '/aug_plots/')
-        if not os.path.isdir(model_dir + '/aug_plots/'):
-            os.mkdir(model_dir + '/aug_plots/')
-
-        aug = Augmenter(X_train, y_seg_train, aug_slices)
-        X_train, y_seg_train = aug.augment(aug_amount, impact_range=aug_stitch_impact_range, plot_samples=True,
-                                           plot_folder=model_dir + '/aug_plots/', plot_amount=20)
-
-        np.savetxt(model_dir+'/augmentations/aug.txt', y_seg_train.squeeze())
-
     early_stopping = EarlyStopping(monitor='val_loss', patience=es_patience, verbose=1, mode='min')
     mcp_save = ModelCheckpoint(
-        model_dir + '/unet_best.h5', save_best_only=True,
+        model_dir + '/SegMADe_best.h5', save_best_only=True,
         monitor='val_loss', mode='min')
 
     print(y_seg_train.squeeze().shape)
@@ -164,7 +183,7 @@ def model_train(
     sample_weight_train = generate_sample_weight(y_seg_train.squeeze())
     sample_weight_val = generate_sample_weight(y_seg_val.squeeze())
 
-    unet = construct_unet(filter_size=16)
+    SegMADe = construct_SegMADe(filter_size=16)
 
     def dice_metric(y_true, y_pred):
         intersection = K.sum(y_pred * y_true)
@@ -172,7 +191,7 @@ def model_train(
         dice = (2. * intersection + smooth) / (K.sum(y_true) + K.sum(y_pred) + smooth)
         return dice
 
-    unet.compile(
+    SegMADe.compile(
         optimizer=Adam(learning_rate=0.0005),
         metrics=[dice_metric],
         # loss="binary_crossentropy"
@@ -180,7 +199,7 @@ def model_train(
         loss=AC_highL
     )
 
-    history = unet.fit(
+    history = SegMADe.fit(
         x=X_train,
         y=y_seg_train,
         epochs=n_epochs,
@@ -192,9 +211,8 @@ def model_train(
         sample_weight=sample_weight_train
     )
 
-
     if plot_model_to_img:
-        plot_model(unet, show_shapes=True, show_layer_names=True,
+        plot_model(SegMADe, show_shapes=True, show_layer_names=True,
                    to_file=model_dir + '/model_plot.jpg')
 
     plot_history(history)

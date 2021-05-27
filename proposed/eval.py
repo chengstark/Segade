@@ -48,17 +48,17 @@ def model_eval(fidx, TESTSET_NAME, filter_size=16, plot_limiter=20):
     y_true = np.load(data_dir + '/processed_dataset/seg_labels.npy')
 
     model_dir = 'model/{}/'.format(fidx)
-    unet = construct_SegMADe(filter_size=filter_size)
-    unet.load_weights(model_dir + '/unet_best.h5')
-    y_preds_ = unet.predict(X_test).squeeze()
+    SegMADe = construct_SegMADe(filter_size=filter_size)
+    SegMADe.load_weights(model_dir + '/SegMADe_best.h5')
+    y_preds_ = SegMADe.predict(X_test).squeeze()
     y_preds = y_preds_.copy()
     np.save(working_dir+'/y_pred.npy', y_preds)
 
     y_true_flat = y_true.flatten().astype(np.int8)
 
     fpr_keras, tpr_keras, thresholds_keras = roc_curve(y_true_flat, y_preds.flatten())
-    np.save(working_dir+'/UNet_TPRs.npy', tpr_keras)
-    np.save(working_dir+'/UNet_FPRs.npy', fpr_keras)
+    np.save(working_dir+'/SegMADe_TPRs.npy', tpr_keras)
+    np.save(working_dir+'/SegMADe_FPRs.npy', fpr_keras)
 
     y_preds[y_preds <= 0.5] = 0
     y_preds[y_preds > 0.5] = 1

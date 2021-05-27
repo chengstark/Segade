@@ -27,20 +27,16 @@ if __name__ == '__main__':
     tiny_seg_counts = []
     best_val_dices = []
     for fidx in range(10):
-        # model_dir = 'model_DICE/{}/'.format(fidx)
+        model_dir = 'model_DICE/{}/'.format(fidx)
         # model_dir = 'model_BCE/{}/'.format(fidx)
         # model_dir = 'model_0L/{}/'.format(fidx)
-        unet = construct_unet(filter_size=16)
-        unet.load_weights(model_dir + '/unet_best.h5')
+        SegMADe = construct_SegMADe(filter_size=16)
+        SegMADe.load_weights(model_dir + '/SegMADe_best.h5')
         X_val = np.load(data_dir + '/X_val_{}.npy'.format(fidx))
         X_val = X_val.reshape((X_val.shape[0], X_val.shape[1], 1))
         y_vals = np.load(data_dir + '/y_seg_val_{}.npy'.format(fidx))
         y_vals = y_vals.reshape((y_vals.shape[0], y_vals.shape[1], 1))
-        y_preds = unet.predict(X_val).squeeze()
-        # data_dir = str(Path(os.getcwd()).parent) + '/data/{}/'.format('PPG_DaLiA_test')
-        # X_test = np.load(data_dir + '/processed_dataset/scaled_ppgs.npy')
-        # y_true = np.load(data_dir + '/processed_dataset/seg_labels.npy')
-        # y_preds = unet.predict(X_test).squeeze()
+        y_preds = SegMADe.predict(X_val).squeeze()
 
         y_preds[y_preds <= 0.5] = 0
         y_preds[y_preds > 0.5] = 1

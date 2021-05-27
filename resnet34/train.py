@@ -27,8 +27,9 @@ tf.random.set_seed(1)
 
 def get_tl_model():
     """
-    Construct transfer learning Resnet34
-    :return: keras model, Resnet34
+    Construct transfer learning Renset 34 model
+    :return: tl resnet 34
+    :rtype: tf.keras.Model
     """
     res_34 = resnet_34(num_classes=2)
     res_34.load_weights('resnet_34_weight.hdf5')
@@ -47,12 +48,13 @@ def get_tl_model():
     return custom_model
 
 
-
 def lrs(epoch):
     """
     Resnet34 learning rate scheduler
-    :param epoch: integer, epochs
-    :return: float, learning rate
+    :param epoch: epochs
+    :type epoch: int
+    :return: learning rate
+    :rtype: float
     """
     learning_rate = 0.00001
     if epoch < 10:
@@ -67,8 +69,10 @@ def lrs(epoch):
 def generate_sample_weight(y):
     """
     Generate sample weight for training
-    :param y: array, ground truth
-    :return: array, sample weight
+    :param y: ground truth
+    :type y: np.ndarray
+    :return: sample weight
+    :rtype: np.ndarray
     """
     n0 = np.where(y[:, 1] == 0)[0].shape[0]
     n1 = np.where(y[:, 1] == 1)[0].shape[0]
@@ -86,9 +90,12 @@ def generate_sample_weight(y):
 def train_res34(fidx, threshold):
     """
     Train the Resnet34
-    :param fidx: integer, fold index range(0, 10)
-    :param threshold: float, range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
+    :param fidx: fold index range(0, 10)
+    :type fidx: int
+    :param threshold: range(0.0, 1.0, 0.1), > threshold -> artifact, <= threshold -> clean
+    :type threshold: float
     :return: None
+    :rtype: None
     """
     print('-------------------------------Training Fold {} Thresh {}-------------------------------'.format(fidx,
                                                                                                             threshold))
@@ -136,7 +143,6 @@ def train_res34(fidx, threshold):
         callbacks=[LearningRateScheduler(lrs), early_stopping, mcp_save],
         sample_weight=sample_weight_train
     )
-
 
     plot_history(history)
     plt.tight_layout()

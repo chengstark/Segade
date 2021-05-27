@@ -127,7 +127,7 @@ def plot_result(ppg, true_label, pred_label=None, show=True, prob=None, save=Tru
                 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(30, 10))
                 plot_on_ax(ppg, true_label, ax1, title='Human Label')
                 plot_on_ax(ppg, true_label, ax3, title='Overlay', overlay=True, label2=pred_label, color2='darkorange')
-                plot_on_ax(ppg, pred_label, ax2, title='ResNet 34 CAM Label', color='darkorange')
+                plot_on_ax(ppg, pred_label, ax2, title='Model Label', color='darkorange')
 
                 cmap = matplotlib.cm.get_cmap('rainbow')
                 ax4.plot(ppg)
@@ -144,7 +144,7 @@ def plot_result(ppg, true_label, pred_label=None, show=True, prob=None, save=Tru
                 fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(30, 3))
                 plot_on_ax(ppg, true_label, ax1, title='Human Label')
                 plot_on_ax(ppg, true_label, ax3, title='Overlay', overlay=True, label2=pred_label, color2='darkorange')
-                plot_on_ax(ppg, pred_label, ax2, title='UNet Label', color='darkorange')
+                plot_on_ax(ppg, pred_label, ax2, title='Model Label', color='darkorange')
 
     if show:
         plt.show()

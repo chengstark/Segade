@@ -10,7 +10,6 @@ tf.get_logger().setLevel("ERROR")
 from sklearn.metrics import roc_curve
 from train import *
 from preprocessing import *
-from postprocessing import *
 from eval import *
 from utils import *
 from sklearn import metrics
@@ -26,19 +25,19 @@ if __name__ == '__main__':
     plot_limiter = int(sys.argv[2])
 
     ##################################################################################################################
-    # '''Preprocessing'''
-    # # preprocess data
-    # # convert segmentation labels to classification label
-    # # resample signal length for resnet34
-    # print('Preprocessing')
-    # pbar1 = tqdm(range(10))
-    # for fidx in pbar1:
-    #     pbar1.set_description('Running fold {}'.format(fidx))
-    #     pbar2 = tqdm(range(0, 11), leave=False)
-    #     for thresh in pbar2:
-    #         thresh = thresh / 10
-    #         pbar2.set_description('Running threshold {}'.format(thresh))
-    #         process_data(fidx, thresh, TESTSET_NAME, process_test_only=True)
+    '''Preprocessing'''
+    # preprocess data
+    # convert segmentation labels to classification label
+    # resample signal length for resnet34
+    print('Preprocessing')
+    pbar1 = tqdm(range(10))
+    for fidx in pbar1:
+        pbar1.set_description('Running fold {}'.format(fidx))
+        pbar2 = tqdm(range(0, 11), leave=False)
+        for thresh in pbar2:
+            thresh = thresh / 10
+            pbar2.set_description('Running threshold {}'.format(thresh))
+            process_data(fidx, thresh, TESTSET_NAME, process_test_only=True)
     
     # ###################################################################################################################
     '''Postprocessing'''
@@ -136,37 +135,3 @@ if __name__ == '__main__':
                   file=overall_report_file_shap)
             overall_report_file_shap.close()
 
-    ###################################################################################################################
-    '''Classification evaluation'''
-    # evaluate classification results, calculate AUC via sklearn
-    check_mkdir('results/{}/classification_reports/'.format(TESTSET_NAME))
-    print('Evaluating Classification')
-
-    class_threshold = 0.0
-    aucs = []
-    f1s = []
-    pbar7 = tqdm(range(10), leave=False)
-    for fidx in pbar7:
-        pbar7.set_description('Running fold {}'.format(fidx))
-        model_dir = 'model/thresh_{}/{}/'.format(class_threshold, fidx)
-        tl_res34 = tf.keras.models.load_model(model_dir + '/model')
-        tl_res34.load_weights(model_dir + '/{}_res34.h5'.format(class_threshold))
-        X_test = np.load('data/{}/X_test_{}.npy'.format(TESTSET_NAME, class_threshold))
-        y_preds = tl_res34.predict(X_test.reshape((X_test.shape[0], X_test.shape[1], 1)))
-        y_class_test = np.load('data/{}/y_class_test_{}.npy'.format(TESTSET_NAME, class_threshold))
-        fpr_keras, tpr_keras, thresholds_keras = roc_curve(y_class_test[:, 1].flatten(), y_preds[:, 1].flatten())
-        f1 = metrics.f1_score(y_class_test[:, 1], np.argmax(y_preds, axis=1), average='macro')
-        f1s.append(f1)
-        auc = metrics.auc(fpr_keras, tpr_keras)
-        aucs.append(auc)
-
-    aucs = np.asarray(aucs)
-    f1s = np.asarray(f1s)
-    overall_report_file_auc = open(
-        'results/{}/classification_report.txt'.format(TESTSET_NAME), 'w+')
-    print(aucs, file=overall_report_file_auc)
-    print('{} +- {}'.format(np.mean(aucs), np.std(aucs)), file=overall_report_file_auc)
-    print('f1 score:', file=overall_report_file_auc)
-    print(f1s, file=overall_report_file_auc)
-    print('{} +- {}'.format(np.mean(f1s), np.std(f1s)), file=overall_report_file_auc)
-    overall_report_file_auc.close()

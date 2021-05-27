@@ -5,13 +5,25 @@ from keras.layers import Activation, BatchNormalization, Conv1D, Dense, GlobalAv
     Lambda
 from keras.models import Model
 
-
 AUDIO_LENGTH = 7201
 
 
-# For m34 Residual, use RepeatVector. Or tensorflow backend.repeat
-
 def identity_block(input_tensor, kernel_size, filters, stage, block):
+    """
+    resnet 34 identity block
+    :param input_tensor: input tensor
+    :type input_tensor: tf.Tensor
+    :param kernel_size: kernel size
+    :type kernel_size: int
+    :param filters: filters
+    :type filters: int
+    :param stage: stage
+    :type stage: int
+    :param block: block
+    :type block: int
+    :return: output
+    :rtype: tf.Tensor
+    """
     conv_name_base = 'res' + str(stage) + str(block) + '_branch'
     bn_name_base = 'bn' + str(stage) + str(block) + '_branch'
 
@@ -49,6 +61,13 @@ def identity_block(input_tensor, kernel_size, filters, stage, block):
 
 
 def resnet_34(num_classes=2):
+    """
+    Generate renset 34 model
+    :param num_classes: number of classes
+    :type num_classes: int
+    :return: resnet 34 model
+    :rtype: tf.keras.Model
+    """
     inputs = Input(shape=[AUDIO_LENGTH, 1])
 
     x = Conv1D(48,

@@ -6,22 +6,14 @@ import shutil
 from tqdm import tqdm
 
 
-def print_arr(arr, n):
-    s = '->'.format(n)
-    idx = 0
-    for a in arr:
-        if a == 1:
-            s += '|{}|'.format(a)
-        elif a == -1:
-            s += '{},'.format(a)
-        else:
-            s += ' {},'.format(a)
-        idx += 1
-    s += ' {}'.format(n)
-    print(s)
-
-
 def get_edges(label):
+    """
+    Get edges of segmentation labels
+    :param label: segmentation label
+    :type label: np.ndarray
+    :return: edges of segmentation labels
+    :rtype: list(int, int)
+    """
     label = label.flatten( )
     ref = label[1:] - label[:-1]
     base = np.zeros_like(label)
@@ -53,7 +45,51 @@ def get_edges(label):
 
 def plot_result(ppg, true_label, pred_label=None, show=True, prob=None, save=True, save_path=None,
                 plot_prob=False, plot_true_only=False, title_addition='', probvmin=0, probvmax=1, explainer='CAM'):
+    """
+    Segmentation result visualizer
+    :param ppg: ppg signals
+    :type ppg: np.ndarray
+    :param true_label: segmentation true label
+    :type true_label: np.ndarray
+    :param pred_label:  segmentation prediction label
+    :type pred_label: np.ndarray
+    :param show: display the plot or not
+    :type show: bool
+    :param prob: raw model output
+    :type prob: np.ndarray
+    :param save: save the plot or not
+    :type save: bool
+    :param save_path: save path
+    :type save_path: str
+    :param plot_prob: plot raw output or not
+    :type plot_prob: bool
+    :param plot_true_only: plot true labels only or not
+    :type plot_true_only: bool
+    :return: None
+    :rtype: None
+    """
     def plot_on_ax(ppg, label, ax, title='', color='g', overlay=False, label2=None, color2='y'):
+        """
+        Plot signal and label on axis
+        :param ppg: ppg signals
+        :type ppg: np.ndarray
+        :param label: segmentation label
+        :type label: np.ndarray
+        :param ax: axis to be plotted
+        :type ax: matplotlib.axes
+        :param title: title
+        :type title: str
+        :param color: matplotlib color for true label
+        :type color: str0
+        :param overlay:
+        :type overlay: bool
+        :param label2: segmentation label
+        :type label2: np.ndarray
+        :param color2: matplotlib color for predicted label
+        :type color2: str
+        :return: None
+        :rtype: None
+        """
         ax.plot(ppg)
         ax.margins(x=0, y=0)
         edges = get_edges(label)
@@ -107,7 +143,7 @@ def plot_result(ppg, true_label, pred_label=None, show=True, prob=None, save=Tru
                 fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(30, 3))
                 plot_on_ax(ppg, true_label, ax1, title='Human Label'+title_addition)
                 plot_on_ax(ppg, true_label, ax3, title='Overlay', overlay=True, label2=pred_label, color2='darkorange')
-                plot_on_ax(ppg, pred_label, ax2, title='UNet Label', color='darkorange')
+                plot_on_ax(ppg, pred_label, ax2, title='ResNet 34 {} Label'.format(explainer), color='darkorange')
 
     if show:
         plt.show()

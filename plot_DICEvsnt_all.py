@@ -8,8 +8,8 @@ import matplotlib
 def get_dice(TESTSET_NAME, real_dataset_name, ax):
     DICE_dict = dict()
     nt_dict = dict()
-    for model in ['unet', 'resnet34', 'pulse_template_matching', 'cnn_slider']:
-        if model != 'unet':
+    for model in ['proposed', 'resnet34', 'pulse_template_matching', 'cnn_slider']:
+        if model != 'proposed':
             if model == 'resnet34':
                 for exp in ['_CAM', '_SHAP']:
                     seg_report_folder = model + '/results/{}/segmentation_reports{}/'.format(TESTSET_NAME, exp)
@@ -86,9 +86,8 @@ def get_dice(TESTSET_NAME, real_dataset_name, ax):
     # for c in colors:
     #     rgb_colors.append(matplotlib.colors.to_rgba_array(c))
 
-    ax.errorbar(x_loc//2, y=float(DICE_dict['unet'][0].split(' +- ')[0]), yerr=float(DICE_dict['unet'][0].split(' +- ')[1]), color='purple', linewidth=4, label='Proposed\nModel')
-    ax.axhline(y=float(DICE_dict['unet'][0].split(' +- ')[0]), color='purple', linewidth=1)
-    # ax.text(1.8, float(DICE_dict['unet'][0].split(' +- ')[0]), 'Proposed Model', color='purple')
+    ax.errorbar(x_loc//2, y=float(DICE_dict['proposed'][0].split(' +- ')[0]), yerr=float(DICE_dict['proposed'][0].split(' +- ')[1]), color='purple', linewidth=4, label='Proposed\nModel')
+    ax.axhline(y=float(DICE_dict['proposed'][0].split(' +- ')[0]), color='purple', linewidth=1)
 
     ax.set_xticks(tick_pos)
     ax.set_xticklabels(['Baseline 1', 'Baseline 2', 'Baseline 3', 'Baseline 4'], rotation=45)

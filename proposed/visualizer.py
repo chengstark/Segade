@@ -134,7 +134,7 @@ def plot_result(ppg, true_label, pred_label=None, show=True, raw_prediction=None
                 plot_on_ax(ppg, true_label, ax3, title='Overlay', overlay=True, label2=pred_label, color2='darkorange')
                 # ax3.plot(raw_prediction)
                 # ax3.set_title('Prediction Time Series')
-                plot_on_ax(ppg, pred_label, ax2, title='UNet Label'+' '+additional_title, color='darkorange')
+                plot_on_ax(ppg, pred_label, ax2, title='SegMADe Label'+' '+additional_title, color='darkorange')
 
                 cmap = matplotlib.cm.get_cmap('rainbow')
                 ax4.plot(ppg)
@@ -151,7 +151,7 @@ def plot_result(ppg, true_label, pred_label=None, show=True, raw_prediction=None
                 fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(30, 3))
                 plot_on_ax(ppg, true_label, ax1, title='Human Label')
                 plot_on_ax(ppg, true_label, ax3, title='Overlay', overlay=True, label2=pred_label, color2='darkorange')
-                plot_on_ax(ppg, pred_label, ax2, title='UNet Label'+' '+additional_title, color='darkorange')
+                plot_on_ax(ppg, pred_label, ax2, title='SegMADe Label'+' '+additional_title, color='darkorange')
 
     if show:
         plt.show()
@@ -182,9 +182,9 @@ def visualize(plot_prob):
     X_val = np.load(working_dir + '/processed_dataset/scaled_ppgs.npy')
     y_true = np.load(working_dir + '/processed_dataset/seg_labels.npy')
 
-    unet = construct_SegMADe(filter_size=16)
-    unet.load_weights(working_dir + '/model_weights/unet_best.h5')
-    y_pred = unet.predict(X_val).squeeze()
+    SegMADe = construct_SegMADe(filter_size=16)
+    SegMADe.load_weights(working_dir + '/model_weights/SegMADe_best.h5')
+    y_pred = SegMADe.predict(X_val).squeeze()
     y_pred_raw = y_pred
     y_pred[y_pred < 0.5] = 0
     y_pred[y_pred >= 0.5] = 1

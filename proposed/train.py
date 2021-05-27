@@ -131,7 +131,7 @@ def model_train(
 
     early_stopping = EarlyStopping(monitor='val_loss', patience=es_patience, verbose=1, mode='min')
     mcp_save = ModelCheckpoint(
-        model_dir + '/unet_best.h5', save_best_only=True,
+        model_dir + '/SegMADe_best.h5', save_best_only=True,
         monitor='val_loss', mode='min')
 
     sample_weight_train = generate_sample_weight(y_seg_train.squeeze())
