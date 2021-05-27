@@ -13,6 +13,9 @@ Step (7): The trained model’s predictions are provided for evaluation against 
 # Model architecture
 ![model](https://github.com/chengstark/SegMADe/raw/main/readme_images/model_U_plot%20v3.png)
 
+# Results
+![results](https://github.com/chengstark/SegMADe/raw/main/readme_images/model_U_plot%20v3.png)
+
 # Installation and Results Reproduction
 <pre>
 Use environment_no_builds.yml if not on Linux
