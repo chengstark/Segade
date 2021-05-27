@@ -11,3 +11,4 @@ Step (6): Predictions by the trained model are made on the PPG DaliA test set, W
 Step (7): The trained model’s predictions are provided for evaluation against human-annotated ground truth.\
 
 # Model
+![model](https://github.com/chengstark/SegMADe/raw/main/readme_images/model_U_plot%20v3.png)
