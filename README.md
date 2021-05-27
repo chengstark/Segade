@@ -17,7 +17,10 @@ Step (7): The trained model’s predictions are provided for evaluation against 
 ![results](https://github.com/chengstark/SegMADe/raw/main/readme_images/results.png)
 
 # Results Visualizations
-
+![vis_1](https://github.com/chengstark/SegMADe/raw/main/readme_images/DaLiA_38.jpg)
+![vis_2](https://github.com/chengstark/SegMADe/raw/main/readme_images/DaLia_715.jpg)
+![vis_3](https://github.com/chengstark/SegMADe/raw/main/readme_images/TROIKA_6.jpg)
+![vis_4](https://github.com/chengstark/SegMADe/raw/main/readme_images/WESAD_2880.jpg)
 
 # Installation and Results Reproduction
 <pre>
