@@ -128,11 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# images
-*.png
-*.jpg
-*.jpeg
-
 # mdoel files
 *.h5
 
