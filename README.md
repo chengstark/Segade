@@ -2,7 +2,7 @@
 A Supervised Machine Learning Semantic Segmentation Approach forDetecting Motion Artifacts in Plethysmography Signals from Wearables
 
 # SegMADe Pipeline
-![overall_pipeline](https://github.com/chengstark/SegMADe/raw/main/readme_images/overall_pipeline.png)
+![overall_pipeline](https://github.com/chengstark/SegMADe/raw/main/readme_images/overall_pipeline2.png)
 Step (1): 30-second  signal  segments  from  PPG  DaLiA  were  split  into  train  and  test  set  by randomly chosen subject IDs.\
 Step (2): Datasets were uploaded into the [web annotation tool](https://github.com/chengstark/SegMADe-Annotation-Tool) for human annotation. \
 Steps (3): and (4): The tool transcribes human annotations into binary segmentation label masks (ground truth) and 30-second signal segments were stored into the back-end database.\
