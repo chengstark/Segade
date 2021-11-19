@@ -1,5 +1,5 @@
 # Segade
-A Supervised Machine Learning Semantic Segmentation Approach forDetecting Motion Artifacts in Plethysmography Signals from Wearables
+A supervised machine learning semantic segmentation approach for detecting artifacts in plethysmography signals from wearables
 
 # Segade Pipeline
 ![overall_pipeline](https://github.com/chengstark/Segade/raw/main/readme_images/overall_pipeline2.png)
