@@ -8,7 +8,7 @@ Step (2): Datasets were uploaded into the [web annotation tool](https://github.c
 Steps (3): and (4): The tool transcribes human annotations into binary segmentation label masks (ground truth) and 30-second signal segments were stored into the back-end database.\
 Step (5): Ground truth and 30-second signal segments were then used to train the model.\
 Step (6): Predictions by the trained model are made on the PPG DaliA test set, WESAD, TROIKA, and UCSF datasets.\
-Step (7): The trained model’s predictions are provided for evaluation against human-annotated ground truth.\
+Step (7): The trained model’s predictions are provided for evaluation against human-annotated ground truth.
 
 # Model architecture
 ![model](https://github.com/chengstark/Segade/raw/main/readme_images/model_U_plot%20v3.png)
